@@ -10,4 +10,4 @@ This WiFi Sucks is a free app that allows you to anonymously rate the WiFi where
 
 Release Date: Spring 2014
 
-Access the Art Assets and XIB's [here](https://drive.google.com/folderview?id=0B6jk8rzz3GfVVG00V0NDUlYtS0E&usp=sharing). Updated all: Jan 23, 20014 at 2:50pm
+Access the Art Assets and XIB's [here](https://drive.google.com/folderview?id=0B6jk8rzz3GfVVG00V0NDUlYtS0E&usp=sharing). Updated all: Jan 23, 2014 at 2:50pm
