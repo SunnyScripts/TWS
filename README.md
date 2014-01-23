@@ -10,4 +10,32 @@ This WiFi Sucks is a free app that allows you to anonymously rate the WiFi where
 
 Release Date: Spring 2014
 
-Access the Art Assets and XIB's [here](https://drive.google.com/folderview?id=0B6jk8rzz3GfVVG00V0NDUlYtS0E&usp=sharing). Updated all: Jan 23, 2014 at 2:50pm
+Art Assets and XIB's
+===============
+
+[Google Drive](https://drive.google.com/folderview?id=0B6jk8rzz3GfVVG00V0NDUlYtS0E&usp=sharing). 
+
+Updated all: Jan 23, 2014 at 2:50pm
+
+External Libraries Used
+===============
+
+[UIImage-PDF](https://github.com/mindbrix/UIImage-PDF) by [Nigel Timothy Barber](https://github.com/mindbrix)
+
+[GPUImage](https://github.com/BradLarson/GPUImage?source=c) by [Brad Larson](https://github.com/BradLarson)
+
+[OAuthConsumer](https://code.google.com/p/oauthconsumer/)
+
+Public API's Used
+===============
+
+[Yelp](http://www.yelp.com/developers)
+
+[Foursquare](https://developer.foursquare.com/)
+
+Backend Powered By
+===============
+
+[Google App Engine](https://developers.google.com/appengine/)
+
+[JSON Engine](https://code.google.com/p/jsonengine/)
