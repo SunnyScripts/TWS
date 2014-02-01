@@ -13,9 +13,9 @@ Release Date: Spring 2014
 Art Assets and XIB's
 ===============
 
-[Google Drive](https://drive.google.com/folderview?id=0B6jk8rzz3GfVVG00V0NDUlYtS0E&usp=sharing). 
+[Unavailable at this time]//(https://drive.google.com/folderview?id=0B6jk8rzz3GfVVG00V0NDUlYtS0E&usp=sharing). 
 
-Updated all: Jan 23, 2014 at 2:50pm
+Updated all: Jan 31, 2014 at 6:40pm
 
 External Libraries Used
 ===============
