@@ -36,7 +36,10 @@ typedef enum
 }SearchCategory;
 
 @interface ViewController()
-{//instance variables
+{
+/*instance variables*/
+    //why are there so many!?!?!!!!!?//me thinks you went a little overboard
+    //also still needs organized bro
     CLGeocoder *_geocoder;
     UIImage* pinIcon;
     MapViewAnnotation *currentAnnotation;
@@ -75,7 +78,11 @@ typedef enum
     NSData* oldData;
     InfoViewController* infoViewController;
     ModalTableViewViewController* modalTableViewController;
-    dispatch_queue_t urlRequestQueue;    
+    dispatch_queue_t urlRequestQueue;
+    NSMutableArray *geocodeQueue;
+    BOOL isGeocoding;
+    BOOL yelpCheckIsDone;
+    NSMutableArray *localAppspotArray;
 }
 @property CLGeocoder *geocoder;
 @end
@@ -138,6 +145,7 @@ typedef enum
         self.pinArray = [NSMutableArray new];
         self.addressArray = [NSMutableArray new];
         businessArray = [NSMutableArray new];
+        localAppspotArray = [NSMutableArray new];
         
     /*Data Initialize*/
         
@@ -153,6 +161,7 @@ typedef enum
         isTitledName = YES;
         gpsWasClicked = NO;
         sentRequest = NO;
+        isGeocoding = NO;
         
     /*Map View Initial Setup*/
         
@@ -198,7 +207,7 @@ typedef enum
         
         [shareButton setImage:[UIImage imageWithPDFNamed:@"share.pdf" atHeight:shareButton.bounds.size.height] forState:UIControlStateNormal];
         
-    /*Create Location Manager*/
+    /*Create Location Manager and Geocoder*/
         
         if(nil == locationManager)
         {
@@ -209,6 +218,12 @@ typedef enum
             
             [locationManager startUpdatingLocation];
         }
+        
+        if(!self.geocoder)
+        {
+            self.geocoder = [CLGeocoder new];
+        }
+
         
     /*Get Or Give User UID*///Unique IDentification
         
@@ -433,7 +448,6 @@ typedef enum
     
     NSDictionary* appspotJSON = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
     
-    NSMutableArray *localAppspotArray = [NSMutableArray new];
     
     
     //create a list of TWSBusiness objects//make local appspot list
@@ -465,6 +479,7 @@ typedef enum
         //add yelp and foursquare results to local business list
         for(int i = 0; i < businessArray.count; i++)
         {
+            yelpCheckIsDone = NO;
             int matchingCount = 0;
             
             NSLog(@"entered for loop i");
@@ -493,40 +508,26 @@ typedef enum
                 }
             }
             
-            MKCoordinateRegionMakeWithDistance
-            if(matchingCount == 0)
+            if(matchingCount == 0)//yelp business is not in appspot server
             {
                 TWSBusiness *business = [TWSBusiness new];
-
+                
                 
                 business.name = yelpBusinessName;
                 business.address = yelpBusinessAddress;
                 business.rating = 2;
                 business.ratingCount = 0;
-                business.latitude = [[businessInfo objectForKey:@"latitude"] integerValue];
-                business.longitude = [[businessInfo objectForKey:@"longitude"] integerValue];
                 
-                CLLocation *businessLocation = [[CLLocation alloc] initWithLatitude:business.latitude longitude:business.longitude];
-                NSLog(@"business lat and long %@", businessLocation);
-                business.distanceFromUserLocation = [NSNumber numberWithDouble:[businessLocation distanceFromLocation:locationManager.location]];
+                NSString *addressString = [NSString stringWithFormat:@"%@ %@ %@", yelpBusinessAddress, [yelpBusinessAddressArray objectForKey:@"country_code"], [yelpBusinessAddressArray objectForKey:@"postal_code"]];
+                NSLog(@"Yelp address string: %@", addressString);
+                
+                [self geocodeLocalAppspotArrayIndex:localAppspotArray.count + 1 andAddressString:addressString];
                 
                 [localAppspotArray addObject:business];
             }
         }
+        yelpCheckIsDone = YES;
         
-        NSLog(@"presorted local appspot array: %@", localAppspotArray);
-        
-        //sort by distance
-        NSSortDescriptor *distanceDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromUserLocation" ascending:YES];
-        NSArray *sortDescriptors = @[distanceDescriptor];
-        NSArray *sortedBusinessArray = [localAppspotArray sortedArrayUsingDescriptors:sortDescriptors];//bug here!!
-        
-        
-        for(int i = 0; i < localAppspotArray.count; i++)
-        {
-            TWSBusiness *business = [sortedBusinessArray objectAtIndex:i];
-            NSLog(@"name:%@ distance: %@", business.name, business.distanceFromUserLocation);
-        }
     }
     else//empty yelp list
     {
@@ -536,6 +537,66 @@ typedef enum
 
 #pragma mark - Still Needs Categorized
 
+-(void)geocodeLocalAppspotArrayIndex:(int)index andAddressString:(NSString*)addressString
+{
+    
+    if(!isGeocoding)
+    {
+        isGeocoding = YES;
+        
+
+        
+        [self.geocoder geocodeAddressString:addressString completionHandler:^(NSArray *placemarks, NSError *error)
+         {
+             isGeocoding = NO;
+             
+             if(geocodeQueue[index +1])
+             {
+                 [self geocodeLocalAppspotArrayIndex:index+1 andAddressString:geocodeQueue[index + 1]];
+             }
+             
+             if ([placemarks count] > 0)
+             {
+                 CLPlacemark *placemark = [placemarks objectAtIndex:0];
+                 TWSBusiness *business = localAppspotArray[index];
+                 business.latitude = placemark.location.coordinate.latitude;
+                 business.longitude = placemark.location.coordinate.longitude;
+                 
+                 //getting distance used 3 times// make it its own method?
+                 CLLocation *businessLocation = [[CLLocation alloc] initWithLatitude:business.latitude longitude:business.longitude];
+                 NSLog(@"business lat and long %@", businessLocation);
+                 business.distanceFromUserLocation = [NSNumber numberWithDouble:[businessLocation distanceFromLocation:locationManager.location]];
+                 
+                 if(yelpCheckIsDone)
+                 {
+                     //sort
+                     [self arraySort];
+                     //addpins to map
+                     //update picker
+                 }
+             }
+         }];
+    }
+    else
+    {
+        [geocodeQueue insertObject:addressString atIndex:index];
+    }
+}
+
+-(void)arraySort
+{
+    //sort by distance
+    NSSortDescriptor *distanceDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromUserLocation" ascending:YES];
+    NSArray *sortDescriptors = @[distanceDescriptor];
+    NSArray *sortedBusinessArray = [localAppspotArray sortedArrayUsingDescriptors:sortDescriptors];
+    
+    
+    for(int i = 0; i < localAppspotArray.count; i++)
+    {
+        TWSBusiness *business = [sortedBusinessArray objectAtIndex:i];
+        NSLog(@"name:%@ distance: %@", business.name, business.distanceFromUserLocation);
+    }
+}
 
 -(void)changedSearchFilter
 {
@@ -897,6 +958,26 @@ typedef enum
         }
     }
     [mapView setVisibleMapRect:zoomRect animated:YES];
+}
+
+-(void)geocodeAddress:(NSString*)address inTheCountry:(NSString*)country atZipCode:(NSString*)zipCode
+{
+    if(!self.geocoder)
+    {
+        self.geocoder = [[CLGeocoder alloc] init];
+    }
+    [self.geocoder geocodeAddressString:[NSString stringWithFormat:@"%@ %@ %@", address, country, zipCode] completionHandler:^(NSArray *placemarks, NSError *error)
+    {
+        if ([placemarks count] > 0)
+        {
+            CLPlacemark *placemark = [placemarks objectAtIndex:0];
+            CLLocation *location = placemark.location;
+        }
+        else
+        {
+            NSLog(@"invalid geolocation data");
+        }
+    }];
 }
 
 #pragma mark - Yelp Request ToBeDeleted
