@@ -38,8 +38,6 @@ typedef enum
 @interface ViewController()
 {
 /*instance variables*/
-    //why are there so many!?!?!!!!!?//me thinks you went a little overboard
-    //also still needs organized bro
     CLGeocoder *_geocoder;
     UIImage* pinIcon;
     MapViewAnnotation *currentAnnotation;
@@ -988,8 +986,6 @@ typedef enum
     NSString* category;
     
     [locationManager startUpdatingLocation];
-    
-    
     /*
     switch(searchFilter.selectedSegmentIndex)//what tab of the segmented controller are we on
     {{
@@ -1048,39 +1044,8 @@ typedef enum
         case find:
             break;
     }
-    
-    
-    
-    
     */
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+	
     switch(searchCategory)
     {
         case 1:
@@ -1275,10 +1240,6 @@ typedef enum
     
     return annotationView;
 }
-
-
-
-
 
 
 - (void)updateAnnotations
